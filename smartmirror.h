@@ -1,73 +1,42 @@
 #ifndef SMARTMIRROR_H
 #define SMARTMIRROR_H
+#include <iostream>
+#include <vector>
 #define OFF 0
 #define ON 1
 
+int power;
+int display = 0;
+std:: vector <char> weather;
+std:: vector <char> olmpic;
+std:: vector <char> sports;
+std:: vector <double> room_condition;
+std:: vector <int> room_light;
 
-class SmartMirror
-{	
-public:
-    int power;
+// smartmirror
+void runningSmartMirror(int user, int display=2, std::vector <char> weather, std::vector <char> olmpic, std::vector <char> sports, std::vector <double> room_condition, std::vector <int> room_light);
+void waittingSmartMirror(int display, std::vector <char> weather, std::vector <char> olmpic, std::vector <char> sports, std::vector <double> room_condition);
+void setUser(int user_number);
 
-	SmartMirror();
-	void initSmartMirror();
-	void runningSmartMirror();
-    void options();
-	~SmartMirror();
-}; 
+// setupServerSocket
+void setServerSocket();
+void readServerSocket();
+void writeServerSocket();
+void closeServerSocket();
 
-class User:public SmartMirror{
-private:
-    char name;
-    int number;
-    int function;
-public:
-    User();
-    void selectUser();
-};
+// get data
+void getUserData();             // name, user_number, place, function
+void getRoomLightData();
+void getWeatherData();		    // thread 1hour
+void getOlmpicData();		    // therad 1hour
+void getSportsData();		    // thread 1hour
+void getRoomCondition();		// thread 30sec, 1min
 
-class ServerSocket: public SmartMirror{
-private:
-    int server_fd;
-    int new_socket;
-    int opt;
-    int addrlen;
-    char buffer;
-public:
-    void createServerSocket();
-    void setupServerSocket();
-    void bindServerSocket();
-    void listenServerSocket();
-    void acceptServerSocket();
-    void readServerSocket();
-    void closeServerSocket();
-};
 
-class Display: public SmartMirror{
-private:
-    int size;
-	int name;
-public:
-	Display();
-	void displayData();
-};
-
-class Olmpic: public Display{
-private:
-    int country;
-	int year;
-    int sport_event;
-public:
-    Olmpic();
-    void olmpicAnalysis();
-};
-
-class Weather: public Display{
-private:
-    int region;
-public:
-    Weather();
-    void findWeather();
-};
+// display
+void Display(int display);
+void waitDisplay();
+void menuDisplay();
+void mainDisplay();
 
 #endif

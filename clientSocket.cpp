@@ -5,6 +5,8 @@
 
 #define PORT 8080
 
+// Iot light
+
 int main() {
     int sock = 0;
     struct sockaddr_in serv_addr;
