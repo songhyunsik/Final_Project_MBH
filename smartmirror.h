@@ -2,6 +2,7 @@
 #define SMARTMIRROR_H
 #include <iostream>
 #include <vector>
+
 #define OFF 0
 #define ON 1
 

@@ -24,7 +24,7 @@ int main(void){
 			runningSmartMirror(user_number, display=2, weather, olmpic, sports, room_condition, room_light);
 			continue;
 		case OFF:
-			waittingSmartMirror(display=0, weather, olmpic, sports, room_condtion);
+			waittingSmartMirror(display=0, weather, olmpic, sports, room_condition);
 			Display(display);
 			setUser(user_number);
 			continue;
