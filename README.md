@@ -9,3 +9,4 @@ Final_Project_MBH ....
 
 - ChatGPT 4.0 결제
 - 재료 지출 품의서 작성 후, 승인 요청
+- SK6812 LED, DHT22 센서 코드 작성
