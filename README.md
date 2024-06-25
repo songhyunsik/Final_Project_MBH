@@ -97,16 +97,16 @@ Final_Project_MBH ....
 |           |  		     v
 |           |	        while(ON)
 |           | 
-|-----------v		    (pg)
+|-----------v		     (pg)
 
- 		        exit()
-   		            |
-   		            |
-   	   	            |
-   		            |
+ 		         exit()
+   		           |
+   		           |
+   	   	           |
+   		           |
    		            v
 
-	            return 0;
+	             return 0;
 ```
 
 # 2024-06-26[수]
