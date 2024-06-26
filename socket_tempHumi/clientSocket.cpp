@@ -44,7 +44,7 @@ int main() {
     while (true) {
         send(sockfd, humi, strlen(humi), 0);
         std::cout << "Message sent: " << humi << std::endl;
-        send(sockfd, tmep, strlen(tmep), 0);
+        send(sockfd, temp, strlen(temp), 0);
         std::cout << "Message sent: " << tmep << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(INTERVAL));
