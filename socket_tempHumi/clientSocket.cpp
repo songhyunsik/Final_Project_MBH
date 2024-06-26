@@ -19,7 +19,8 @@ int main() {
     // data가져와서 char*로 변환
     DHT22Result data = read_dht22();
     char* humi = (char*)int2Char(data.humidity);
-    char* tmep = (char*)float2Char(data.temperature);
+    char* temp = (char*)int2Char(data.temperature);
+    
 
     // 서버 주소 설정
     server_addr.sin_family = AF_INET;

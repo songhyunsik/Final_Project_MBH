@@ -51,7 +51,7 @@ DHT22Result read_dht22() {
         float h = (float)((data[0] << 8) + data[1]) / 10; 
         if (h > 100) h = data[0];
         // 섭씨 온도
-        float c = (float)(((data[2] & 0x7F) << 8) + data[3]) / 10; 
+        float t = (float)(((data[2] & 0x7F) << 8) + data[3]) / 10; 
         if (c > 125) c = data[2];
         if (data[2] & 0x80) c = -c;
         result.humidity = static_cast<int>(h);
@@ -68,11 +68,5 @@ DHT22Result read_dht22() {
 char int2Char(int result) {
     char buffer[10];
     sprintf(buffer, "%d", result);
-    return buffer;
-}
-
-char float2Char(float result){
-    char buffer[10];
-    sprintf(buffer, "%f", result);
     return buffer;
 }
