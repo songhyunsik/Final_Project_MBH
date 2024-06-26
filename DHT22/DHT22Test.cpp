@@ -1,16 +1,14 @@
-#include <wiringPi.h>
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-
+#include <wiringPi.h>  
+#include <iostream>    
+#include <cstdlib>     
+#include <cstdint>     
+#include "DHTData.h"
 #define MAX_TIMINGS 85
-#define DHT_PIN 7  // BCM GPIO 4
+#define DHT_PIN 4  // BCM GPIO 4
 
 int data[5] = {0, 0, 0, 0, 0};
 
-void readDHT22Data() {
+readDHT22Data read_dht22() {
     uint8_t lastState = HIGH;
     uint8_t counter = 0;
     uint8_t j = 0, i;
@@ -37,47 +35,42 @@ void readDHT22Data() {
 
         if ((i >= 4) && (i % 2 == 0)) {
             data[j / 8] <<= 1;
-            if (counter > 16)
+            if (counter > 16) {
                 data[j / 8] |= 1;
+            }
             j++;
         }
     }
 
-    if ((j >= 40) &&
-        (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
-        float h = (float)((data[0] << 8) + data[1]) / 10;
-        if (h > 100) h = data[0];
-
-        float c = (float)(((data[2] & 0x7F) << 8) + data[3]) / 10;
-        if (c > 125) c = data[2];
-
-        if (data[2] & 0x80) c = -c;
-
-        float f = c * 1.8f + 32;
-
-        std::cout << "Humidity = " << h << " %\n";
-        std::cout << "Temperature = " << c << " *C (" << f << " *F)\n";
-
-        std::ofstream outFile("dht22_data.txt");
-        if (outFile.is_open()) {
-            outFile << h << "\n" << c << "\n";
-            outFile.close();
+    readDHT22Data result;
+     if ((j >= 40) && // 모든 데이터가 수집되었는지 확인
+        (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) { // 체크섬 확인
+        float h = (float)((data[0] << 8) + data[1]) / 10; // 습도 계산
+        if (h > 100) {
+            h = data[0];
         }
+        float c = (float)(((data[2] & 0x7F) << 8) + data[3]) / 10; // 섭씨 온도 계산
+        if (c > 125) {
+            c = data[2];
+        }
+        if (data[2] & 0x80) {
+            c = -c;
+        }
+        float f = c * 1.8f + 32; // 화씨 온도로 변환
+        result.humidity = static_cast<int>(h);
+        result.temperatureC = static_cast<int>(c);
+        result.temperatureF = static_cast<int>(f);
     } else {
-        std::cout << "Data not good, skip\n";
+        std::cerr << "데이터 읽기 실패" << std::endl; // 데이터 읽기 실패 메시지 출력
+        result.humidity = -1;
+        result.temperatureC = -1;
+        result.temperatureF = -1;
     }
+    return result;
 }
 
-int main() {
-    if (wiringPiSetup() == -1) {
-        std::cout << "wiringPi setup failed!\n";
-        return -1;
-    }
-
-    while (true) {
-        readDHT22Data();
-        delay(1000);  // wait 1 second
-    }
-
-    return 0;
+char int2Char(int result) {
+    char buffer[10];
+    sprintf(buffer, "%d", result);
+    return buffer[10];
 }

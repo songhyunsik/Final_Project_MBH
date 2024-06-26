@@ -1,3 +1,5 @@
+// g++ -o Server DHT22Server.cpp -lwiringPi -std=c++11
+
 #include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
