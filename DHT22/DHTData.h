@@ -9,7 +9,7 @@ struct readDHT22Data {
 };
 
 readDHT22Data read_dht22();
-const char* int2Char(int result);
+char int2Char(int result);
 char float2Char(float result);
 
 #endif //DHTDATA_H   
