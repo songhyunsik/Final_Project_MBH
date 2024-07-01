@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.2)
+project(basicOp)
+find_package(OpenCV REQUIRED)
+find_package(CURL REQUIRED)
+find_package(X11 REQUIRED)
+file(GLOB SOURCES "*.cpp")
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+foreach(SOURCE ${SOURCES})
+    get_filename_component(EXE_NAME ${SOURCE} NAME_WE)
+    add_executable(${EXE_NAME} ${SOURCE})
+    target_link_libraries(${EXE_NAME} ${OpenCV_LIBS} ${CURL_LIBRARIES} X11)
+    target_link_libraries(${EXE_NAME} )
+    target_include_directories(${EXE_NAME} PUBLIC ${OpenCV_LIB_DIR})
+endforeach()

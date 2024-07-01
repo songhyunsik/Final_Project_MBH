@@ -1,0 +1,4 @@
+/home/hrd/Project_MBH/opencv_smartMirror/build/CMakeFiles/main.dir
+/home/hrd/Project_MBH/opencv_smartMirror/build/CMakeFiles/opencv.dir
+/home/hrd/Project_MBH/opencv_smartMirror/build/CMakeFiles/edit_cache.dir
+/home/hrd/Project_MBH/opencv_smartMirror/build/CMakeFiles/rebuild_cache.dir
