@@ -24,6 +24,7 @@ int main( void ) {
     struct sockaddr_in  serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(8080);
+    char tempbuffer[50];
     char buffer[50];
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -32,7 +33,6 @@ int main( void ) {
     }
     
     //dht22 init
-    int t=0;
     TDHT22 *MySensor = new TDHT22(DHT_PIN);
     MySensor->Init();                   
 
@@ -52,12 +52,9 @@ int main( void ) {
     while(1){
         MySensor->Fetch();
         std::cout << "Temp : " << MySensor->Temp  << " °C  Humidity : " << MySensor->Hum << " %" << std::endl;
-        sprintf(buffer,"%f",MySensor->Temp);
-        send(sock, buffer, strlen(buffer), 0);
-        sprintf(buffer,"%f",MySensor->Hum);
+        sprintf(buffer,"Temp:%0.1f°C  Humidity: %0.1f",MySensor->Temp,MySensor->Hum);
         send(sock, buffer, strlen(buffer), 0);
         delay(1000);
-        t++;
     }
 
     delete MySensor;
