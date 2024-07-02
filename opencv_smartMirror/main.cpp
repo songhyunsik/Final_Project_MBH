@@ -57,8 +57,9 @@ int main() {
     // 대시보드 매트릭스 생성
     cv::Mat dashboard(600, 300, CV_8UC3, cv::Scalar(0, 0, 0));
 
-    // 창 생성
-    cv::namedWindow("Dashboard", cv::WINDOW_AUTOSIZE);
+    // 창 생성 및 풀스크린 설정
+    cv::namedWindow("Dashboard", cv::WINDOW_NORMAL);
+    cv::setWindowProperty("Dashboard", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
 
     while (true) {
         // 현재 날짜와 시간 가져오기
