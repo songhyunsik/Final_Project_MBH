@@ -2,6 +2,8 @@
 - chat GPT_smartMirror server program
 - google cloud : send,read
 - DHT22 : read,  LED: send -> DHT: read, LED: read,send
+- it can resocketing
+- it's needec checking
 */
 
 
