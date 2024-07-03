@@ -15,7 +15,7 @@ int main() {
 
     // 소켓 파일 디스크립터 생성
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        perror("socket failed");
+        perror("소켓 생성 실패.");
         exit(EXIT_FAILURE);
     }
 
@@ -26,41 +26,47 @@ int main() {
 
     // 소켓을 주소에 바인딩
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        perror("bind failed");
+        perror("바인딩 실패.");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
 
     // 연결 요청 대기
     if (listen(server_fd, 3) < 0) {
-        perror("listen failed");
+        perror("요청 실패.");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
 
-    printf("Server listening on port %d\n", PORT);
+    printf("%d 포트 연결 대기중입니다...\n", PORT);
 
     // 연결 수락
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
-        perror("accept failed");
+        perror("승인 실패.");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
 
-    printf("Connection accepted\n");
+    printf("연결에 성공하였습니다!\n");
 
     // 실시간 명령 전송 루프
     while (1) {
-        printf("Enter command (ON/OFF) or brightness value (0-255): ");
+        printf("밝기 조절 (0~100) / 'ON' 또는 'OFF'를 입력해주세요. : ");
         fgets(buffer, BUFFER_SIZE, stdin);
-        buffer[strcspn(buffer, "\n")] = 0;  // 개행 문자 제거
+        buffer[strcspn(buffer, "\n")] = 0;
 
-        if (strcmp(buffer, "ON") == 0 || strcmp(buffer, "OFF") == 0 || 
-            (atoi(buffer) >= 0 && atoi(buffer) <= 255)) {
+        if (strcmp(buffer, "ON") == 0 || strcmp(buffer, "OFF") == 0 || (0 <= atoi(buffer) && atoi(buffer) <= 100)) {
             send(new_socket, buffer, strlen(buffer), 0);
-            printf("Sent command: %s\n", buffer);
+            printf("클라이언트로 데이터/커맨드를 전송합니다. : %s\n", buffer);
         } else {
-            printf("Invalid input. Please enter 'ON', 'OFF', or a brightness value between 0 and 255.\n");
+            printf("'ON', 'OFF'을 입력해주시거나, 0~100 사이의 밝기값을 입력해주세요.\n");
+        }
+
+        memset(buffer, 0, BUFFER_SIZE);
+        int valread = recv(new_socket, buffer, BUFFER_SIZE, 0);
+        if (valread > 0) {
+            buffer[valread] = '\0';
+            printf("현재 LED의 밝기 값: %s\n", buffer);
         }
     }
 

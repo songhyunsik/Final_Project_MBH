@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "inet.h": "c",
-        "ws2811.h": "c"
+        "ws2811.h": "c",
+        "system_error": "c"
     }
 }

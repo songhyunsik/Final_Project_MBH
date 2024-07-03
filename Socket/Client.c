@@ -23,24 +23,24 @@ ws2811_t ledstring = {
             .gpionum = GPIO_PIN,
             .count = LED_COUNT,
             .invert = 0,
-            .brightness = 255,
+            .brightness = 100,
             .strip_type = WS2811_STRIP_GRB,
         },
     },
 };
 
 // LED 초기화 함수
-void initialize_led() {
-    if (ws2811_init(&ledstring)) {
-        fprintf(stderr, "ws2811_init failed\n");
-        exit(1);
-    }
-}
+// void initialize_led() {
+//     if (ws2811_init(&ledstring)) {
+//         fprintf(stderr, "ws2811_init failed\n");
+//         exit(1);
+//     }
+// }
 
 // LED 해제 함수
-void finalize_led() {
-    ws2811_fini(&ledstring);
-}
+// void finalize_led() {
+//     ws2811_fini(&ledstring);
+// }
 
 // LED 상태 설정 함수
 void set_sk6812_state(const char* command) {
@@ -60,17 +60,22 @@ void set_sk6812_state(const char* command) {
     }
 }
 
+void send_brightness_to_server(int sock, const char *buffer) {
+    send(sock, buffer, strlen(buffer), 0);
+    printf("현재 밝기 데이터를 서버로 보냅니다. : %s\n", buffer);
+}
+
 int main() {
     int sock = 0;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
 
-    initialize_led();
+    //initialize_led();
 
     // 소켓 파일 디스크립터 생성
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("Socket creation error\n");
-        finalize_led();
+        printf("소켓 생성 에러.\n");
+        //finalize_led();
         return -1;
     }
 
@@ -79,19 +84,19 @@ int main() {
 
     // 서버 주소 변환
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
-        printf("Invalid address/ Address not supported\n");
-        finalize_led();
+        printf("유효하지 않은 주소 / 지원되지 않는 주소\n");
+        //finalize_led();
         return -1;
     }
 
     // 서버에 연결 요청
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        perror("Connection Failed");
-        finalize_led();
+        perror("연결 실패.");
+        //finalize_led();
         return -1;
     }
 
-    printf("Connected to the server\n");
+    printf("서버에 연결합니다!\n");
 
     // 실시간 명령 수신 루프
     while (1) {
@@ -99,12 +104,19 @@ int main() {
         int valread = read(sock, buffer, BUFFER_SIZE);
         if (valread > 0) {
             buffer[valread] = '\0';
-            set_sk6812_state(buffer); // 명령에 따라 LED 제어
+            if (strcmp(buffer, "ON") == 0 || strcmp(buffer, "OFF") == 0) {
+                printf("커맨드 커맨드를 받았습니다. : %s\n", buffer);
+            }
+            else {
+                printf("서버로부터 데이터를 받아옵니다. : %s\n", buffer);  // 서버에서 받은 값 출력
+            }
+            //set_sk6812_state(buffer); // 명령에 따라 LED 제어
+            send_brightness_to_server(sock, buffer); // 현재 밝기 값을 서버로 전송
         }
     }
 
     // 소켓 종료
     close(sock);
-    finalize_led();
+    //finalize_led();
     return 0;
 }
