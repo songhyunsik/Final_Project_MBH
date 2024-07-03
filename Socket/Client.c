@@ -10,7 +10,7 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 #define LED_PIN 18
-#define LED_COUNT 1
+#define LED_COUNT 100
 #define TARGET_FREQ WS2811_TARGET_FREQ
 #define GPIO_PIN 4
 #define DMA 10
@@ -46,11 +46,15 @@ void finalize_led() {
 void set_sk6812_state(const char* command) {
     if (strcmp(command, "ON") == 0) {
         printf("SK6812 LED is ON\n");
-        ledstring.channel[0].leds[0] = 0xFFFFFF; // Green color
+        for(int i = 0; i < LED_COUNT; i++) {
+            ledstring.channel[0].leds[0] = 0xFFFFFF; // While color
+        }
         ws2811_render(&ledstring);
     } else if (strcmp(command, "OFF") == 0) {
         printf("SK6812 LED is OFF\n");
-        ledstring.channel[0].leds[0] = 0x000000; // Off
+        for(int i = 0; i < LED_COUNT; i++) {
+            ledstring.channel[0].leds[0] = 0x000000; // Off
+        }
         ws2811_render(&ledstring);
     } else {
         int brightness = atoi(command);
