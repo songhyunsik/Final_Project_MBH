@@ -23,7 +23,7 @@ ws2811_t ledstring = {
             .gpionum = GPIO_PIN,
             .count = LED_COUNT,
             .invert = 0,
-            .brightness = 100,
+            .brightness = 50,
             .strip_type = WS2811_STRIP_GRB,
         },
     },
@@ -46,7 +46,7 @@ ws2811_t ledstring = {
 void set_sk6812_state(const char* command) {
     if (strcmp(command, "ON") == 0) {
         printf("SK6812 LED is ON\n");
-        ledstring.channel[0].leds[0] = 0x00FF00; // Green color
+        ledstring.channel[0].leds[0] = 0xFFFFFF; // Green color
         ws2811_render(&ledstring);
     } else if (strcmp(command, "OFF") == 0) {
         printf("SK6812 LED is OFF\n");
@@ -54,7 +54,7 @@ void set_sk6812_state(const char* command) {
         ws2811_render(&ledstring);
     } else {
         int brightness = atoi(command);
-        printf("Setting SK6812 LED brightness to %d\n", brightness);
+        printf("SK6812 LED의 밝기를 %d으로(로) 설정합니다.\n", brightness);
         ledstring.channel[0].brightness = brightness;
         ws2811_render(&ledstring);
     }

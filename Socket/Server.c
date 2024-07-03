@@ -60,6 +60,7 @@ int main() {
             printf("클라이언트로 데이터/커맨드를 전송합니다. : %s\n", buffer);
         } else {
             printf("'ON', 'OFF'을 입력해주시거나, 0~100 사이의 밝기값을 입력해주세요.\n");
+            continue;
         }
 
         memset(buffer, 0, BUFFER_SIZE);
