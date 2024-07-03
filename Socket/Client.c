@@ -30,17 +30,17 @@ ws2811_t ledstring = {
 };
 
 // LED 초기화 함수
-// void initialize_led() {
-//     if (ws2811_init(&ledstring)) {
-//         fprintf(stderr, "ws2811_init failed\n");
-//         exit(1);
-//     }
-// }
+void initialize_led() {
+    if (ws2811_init(&ledstring)) {
+        fprintf(stderr, "SK6812 LED를 연결해주세요.\n");
+        exit(1);
+    }
+}
 
 // LED 해제 함수
-// void finalize_led() {
-//     ws2811_fini(&ledstring);
-// }
+void finalize_led() {
+    ws2811_fini(&ledstring);
+}
 
 // LED 상태 설정 함수
 void set_sk6812_state(const char* command) {
@@ -75,7 +75,7 @@ int main() {
     // 소켓 파일 디스크립터 생성
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("소켓 생성 에러.\n");
-        //finalize_led();
+        finalize_led();
         return -1;
     }
 
@@ -85,14 +85,14 @@ int main() {
     // 서버 주소 변환
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         printf("유효하지 않은 주소 / 지원되지 않는 주소\n");
-        //finalize_led();
+        finalize_led();
         return -1;
     }
 
     // 서버에 연결 요청
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         perror("연결 실패.");
-        //finalize_led();
+        finalize_led();
         return -1;
     }
 
@@ -110,13 +110,13 @@ int main() {
             else {
                 printf("서버로부터 데이터를 받아옵니다. : %s\n", buffer);  // 서버에서 받은 값 출력
             }
-            //set_sk6812_state(buffer); // 명령에 따라 LED 제어
+            set_sk6812_state(buffer); // 명령에 따라 LED 제어
             send_brightness_to_server(sock, buffer); // 현재 밝기 값을 서버로 전송
         }
     }
 
     // 소켓 종료
     close(sock);
-    //finalize_led();
+    finalize_led();
     return 0;
 }
