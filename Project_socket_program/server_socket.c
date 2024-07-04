@@ -41,55 +41,10 @@ int client_sockets[MAX_CLIENTS] = {0};
 FILE *csv_file;
 pthread_mutex_t file_mutex;
 
-void write_csv_header(FILE *file) {
-    fprintf(file, "year,month,day,hour,min,sec,data\n");
-}
+void write_csv_data(const char *data);
+void *handle_client(void *arg);
+void write_csv_header(FILE *file);
 
-void write_csv_data(const char *data) {
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-    pthread_mutex_lock(&file_mutex);
-    fprintf(csv_file, "%d,%d,%d,%d,%d,%d,%s\n", 
-            t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-            t->tm_hour, t->tm_min, t->tm_sec, data);
-    fflush(csv_file);
-    pthread_mutex_unlock(&file_mutex);
-}
-
-void *handle_client(void *arg) {
-    int sock = *(int *)arg;
-    char buffer[BUFFER_SIZE];
-    int valread;
-
-    while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
-        buffer[valread] = '\0';
-        if (sock == client_sockets[1] || sock == client_sockets[2]) {
-            write_csv_data(buffer);
-            // If it's client C, send the updated status back
-            if (sock == client_sockets[2]) {
-                send(sock, buffer, strlen(buffer), 0);
-            }
-        } else if (sock == client_sockets[3]) {
-            FILE *csv_file_read = fopen("data.csv", "r");
-            if (csv_file_read != NULL) {
-                while (fgets(buffer, BUFFER_SIZE, csv_file_read) != NULL) {
-                    send(sock, buffer, strlen(buffer), 0);
-                }
-                fclose(csv_file_read);
-            }
-        }
-    }
-
-    close(sock);
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (client_sockets[i] == sock) {
-            client_sockets[i] = 0;
-            break;
-        }
-    }
-
-    return NULL;
-}
 
 int main() {
     int server_fd, new_socket;
@@ -163,4 +118,54 @@ int main() {
     pthread_mutex_destroy(&file_mutex);
 
     return 0;
+}
+
+void write_csv_header(FILE *file) {
+    fprintf(file, "year,month,day,hour,min,sec,data\n");
+}
+
+void write_csv_data(const char *data) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    pthread_mutex_lock(&file_mutex);
+    fprintf(csv_file, "%d,%d,%d,%d,%d,%d,%s\n", 
+            t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+            t->tm_hour, t->tm_min, t->tm_sec, data);
+    fflush(csv_file);
+    pthread_mutex_unlock(&file_mutex);
+}
+
+void *handle_client(void *arg) {
+    int sock = *(int *)arg;
+    char buffer[BUFFER_SIZE];
+    int valread;
+
+    while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
+        buffer[valread] = '\0';
+        if (sock == client_sockets[1] || sock == client_sockets[2]) {
+            write_csv_data(buffer);
+            // If it's client C, send the updated status back
+            if (sock == client_sockets[2]) {
+                send(sock, buffer, strlen(buffer), 0);
+            }
+        } else if (sock == client_sockets[3]) {
+            FILE *csv_file_read = fopen("data.csv", "r");
+            if (csv_file_read != NULL) {
+                while (fgets(buffer, BUFFER_SIZE, csv_file_read) != NULL) {
+                    send(sock, buffer, strlen(buffer), 0);
+                }
+                fclose(csv_file_read);
+            }
+        }
+    }
+
+    close(sock);
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (client_sockets[i] == sock) {
+            client_sockets[i] = 0;
+            break;
+        }
+    }
+
+    return NULL;
 }
