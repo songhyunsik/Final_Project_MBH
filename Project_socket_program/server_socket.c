@@ -22,6 +22,8 @@ D: 클라이언트 소켓
 	1. 서버에게 csv파일을 전송 요청
 
 공통기능: 각 소켓은 연결된 후 끊어지지 않음. pthread를 사용한 소켓 동시 운영
+
+주의사항: 각 클라이언트 소켓은 자신의 소켓이 무엇인지 확인하기 위한 데이터를 전송해야 한다.
 */
 
 
@@ -38,13 +40,76 @@ D: 클라이언트 소켓
 #define MAX_CLIENTS 4
 
 int client_sockets[MAX_CLIENTS] = {0};
-FILE *csv_file;
+FILE *humi_temp_file;
+FILE *led_file;
 pthread_mutex_t file_mutex;
 
-void write_csv_data(const char *data);
-void *handle_client(void *arg);
-void write_csv_header(FILE *file);
+void write_csv_header(FILE *file, const char *header) {
+    fprintf(file, "%s\n", header);
+}
 
+void write_csv_data(FILE *file, const char *data) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    pthread_mutex_lock(&file_mutex);
+    fprintf(file, "%d,%d,%d,%d,%d,%d,%s\n", 
+            t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+            t->tm_hour, t->tm_min, t->tm_sec, data);
+    fflush(file);
+    pthread_mutex_unlock(&file_mutex);
+}
+
+void *handle_client(void *arg) {
+    int sock = *(int *)arg;
+    char buffer[BUFFER_SIZE];
+    int valread;
+
+    // 클라이언트 식별
+    valread = read(sock, buffer, BUFFER_SIZE);
+    if (valread <= 0) {
+        close(sock);
+        return NULL;
+    }
+    buffer[valread] = '\0';
+
+    if (strcmp(buffer, "B") == 0) {
+        // 클라이언트 B 처리
+        while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
+            buffer[valread] = '\0';
+            write_csv_data(humi_temp_file, buffer);
+        }
+    } else if (strcmp(buffer, "C") == 0) {
+        // 클라이언트 C 처리
+        while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
+            buffer[valread] = '\0';
+            write_csv_data(led_file, buffer);
+            send(sock, buffer, strlen(buffer), 0);  // 상태를 다시 전송
+        }
+    } else if (strcmp(buffer, "D") == 0) {
+        // 클라이언트 D 처리
+        while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
+            if (strcmp(buffer, "REQUEST_CSV") == 0) {
+                FILE *csv_file_read = fopen("data.csv", "r");
+                if (csv_file_read != NULL) {
+                    while (fgets(buffer, BUFFER_SIZE, csv_file_read) != NULL) {
+                        send(sock, buffer, strlen(buffer), 0);
+                    }
+                    fclose(csv_file_read);
+                }
+            }
+        }
+    }
+
+    close(sock);
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (client_sockets[i] == sock) {
+            client_sockets[i] = 0;
+            break;
+        }
+    }
+
+    return NULL;
+}
 
 int main() {
     int server_fd, new_socket;
@@ -56,17 +121,25 @@ int main() {
     pthread_mutex_init(&file_mutex, NULL);
 
     // CSV 파일 열기
-    csv_file = fopen("data.csv", "w");
-    if (csv_file == NULL) {
-        perror("Failed to open CSV file");
+    humi_temp_file = fopen("Humi_temp.csv", "w");
+    if (humi_temp_file == NULL) {
+        perror("Failed to open Humi_temp.csv");
         exit(EXIT_FAILURE);
     }
-    write_csv_header(csv_file);
+    write_csv_header(humi_temp_file, "year,month,day,hour,min,sec,data");
+
+    led_file = fopen("LED.csv", "w");
+    if (led_file == NULL) {
+        perror("Failed to open LED.csv");
+        exit(EXIT_FAILURE);
+    }
+    write_csv_header(led_file, "year,month,day,hour,min,sec,data");
 
     // 소켓 파일 기술자 생성
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
-        fclose(csv_file);
+        fclose(humi_temp_file);
+        fclose(led_file);
         exit(EXIT_FAILURE);
     }
 
@@ -74,7 +147,8 @@ int main() {
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
         perror("setsockopt failed");
         close(server_fd);
-        fclose(csv_file);
+        fclose(humi_temp_file);
+        fclose(led_file);
         exit(EXIT_FAILURE);
     }
 
@@ -86,7 +160,8 @@ int main() {
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("bind failed");
         close(server_fd);
-        fclose(csv_file);
+        fclose(humi_temp_file);
+        fclose(led_file);
         exit(EXIT_FAILURE);
     }
 
@@ -94,7 +169,8 @@ int main() {
     if (listen(server_fd, 3) < 0) {
         perror("listen failed");
         close(server_fd);
-        fclose(csv_file);
+        fclose(humi_temp_file);
+        fclose(led_file);
         exit(EXIT_FAILURE);
     }
 
@@ -114,58 +190,9 @@ int main() {
     }
 
     close(server_fd);
-    fclose(csv_file);
+    fclose(humi_temp_file);
+    fclose(led_file);
     pthread_mutex_destroy(&file_mutex);
 
     return 0;
-}
-
-void write_csv_header(FILE *file) {
-    fprintf(file, "year,month,day,hour,min,sec,data\n");
-}
-
-void write_csv_data(const char *data) {
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-    pthread_mutex_lock(&file_mutex);
-    fprintf(csv_file, "%d,%d,%d,%d,%d,%d,%s\n", 
-            t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-            t->tm_hour, t->tm_min, t->tm_sec, data);
-    fflush(csv_file);
-    pthread_mutex_unlock(&file_mutex);
-}
-
-void *handle_client(void *arg) {
-    int sock = *(int *)arg;
-    char buffer[BUFFER_SIZE];
-    int valread;
-
-    while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
-        buffer[valread] = '\0';
-        if (sock == client_sockets[1] || sock == client_sockets[2]) {
-            write_csv_data(buffer);
-            // If it's client C, send the updated status back
-            if (sock == client_sockets[2]) {
-                send(sock, buffer, strlen(buffer), 0);
-            }
-        } else if (sock == client_sockets[3]) {
-            FILE *csv_file_read = fopen("data.csv", "r");
-            if (csv_file_read != NULL) {
-                while (fgets(buffer, BUFFER_SIZE, csv_file_read) != NULL) {
-                    send(sock, buffer, strlen(buffer), 0);
-                }
-                fclose(csv_file_read);
-            }
-        }
-    }
-
-    close(sock);
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (client_sockets[i] == sock) {
-            client_sockets[i] = 0;
-            break;
-        }
-    }
-
-    return NULL;
 }
