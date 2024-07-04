@@ -23,7 +23,7 @@ ws2811_t ledstring = {
             .gpionum = GPIO_PIN,
             .count = LED_COUNT,
             .invert = 0,
-            .brightness = 50,
+            .brightness = 0,
             .strip_type = WS2811_STRIP_GRB,
         },
     },
@@ -47,13 +47,13 @@ void set_sk6812_state(const char* command) {
     if (strcmp(command, "ON") == 0) {
         printf("SK6812 LED is ON\n");
         for(int i = 0; i < LED_COUNT; i++) {
-            ledstring.channel[0].leds[0] = 0xFFFFFF; // While color
+            ledstring.channel[0].leds[i] = 0xFFFFFF; // While color
         }
         ws2811_render(&ledstring);
     } else if (strcmp(command, "OFF") == 0) {
         printf("SK6812 LED is OFF\n");
         for(int i = 0; i < LED_COUNT; i++) {
-            ledstring.channel[0].leds[0] = 0x000000; // Off
+            ledstring.channel[0].leds[i] = 0x000000; // Off
         }
         ws2811_render(&ledstring);
     } else {
@@ -74,7 +74,7 @@ int main() {
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
 
-    //initialize_led();
+    initialize_led();
 
     // 소켓 파일 디스크립터 생성
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
