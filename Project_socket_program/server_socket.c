@@ -24,6 +24,7 @@ D: 클라이언트 소켓
 공통기능: 각 소켓은 연결된 후 끊어지지 않음. pthread를 사용한 소켓 동시 운영
 
 주의사항: 각 클라이언트 소켓은 자신의 소켓이 무엇인지 확인하기 위한 데이터를 전송해야 한다.
+파일 >> "/home/hrd/Desktop/data/"
 */
 
 
@@ -89,7 +90,7 @@ void *handle_client(void *arg) {
         // 클라이언트 D 처리
         while ((valread = read(sock, buffer, BUFFER_SIZE)) > 0) {
             if (strcmp(buffer, "REQUEST_CSV") == 0) {
-                FILE *csv_file_read = fopen("data.csv", "r");
+                FILE *csv_file_read = fopen("/home/hrd/Desktop/data/data.csv", "r");
                 if (csv_file_read != NULL) {
                     while (fgets(buffer, BUFFER_SIZE, csv_file_read) != NULL) {
                         send(sock, buffer, strlen(buffer), 0);
@@ -121,14 +122,14 @@ int main() {
     pthread_mutex_init(&file_mutex, NULL);
 
     // CSV 파일 열기
-    humi_temp_file = fopen("Humi_temp.csv", "w");
+    humi_temp_file = fopen("/home/hrd/Desktop/data/Humi_temp.csv", "w");
     if (humi_temp_file == NULL) {
         perror("Failed to open Humi_temp.csv");
         exit(EXIT_FAILURE);
     }
     write_csv_header(humi_temp_file, "year,month,day,hour,min,sec,data");
 
-    led_file = fopen("LED.csv", "w");
+    led_file = fopen("/home/hrd/Desktop/data/LED.csv", "w");
     if (led_file == NULL) {
         perror("Failed to open LED.csv");
         exit(EXIT_FAILURE);
