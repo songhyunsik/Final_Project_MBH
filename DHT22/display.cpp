@@ -1,9 +1,8 @@
 /*
-  g++ main.cpp -o display `pkg-config --cflags --libs opencv4 freetype2
+  g++ main.cpp -o display `pkg-config --cflags --libs opencv4 freetype2`
   font_type : fonts-nanum
   size : 1080*1920
 */
-
 
 #include <iostream>
 #include <cstdint>
