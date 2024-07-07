@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define PORT 12345 // 서버와 동일한 포트 번호 사용
+#define PORT 8080 // 서버와 동일한 포트 번호 사용
 #define BUFFER_SIZE 1024 // 버퍼 크기 설정
 
 int main() {

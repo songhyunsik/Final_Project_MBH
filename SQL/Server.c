@@ -7,7 +7,7 @@
 #include <time.h>
 #include <mysql/mysql.h>
 
-#define PORT 12345 // 포트 번호 설정
+#define PORT 8080 // 포트 번호 설정
 #define BUFFER_SIZE 1024 // 버퍼 크기 설정
 #define MAX_CLIENTS 4 // 최대 클라이언트 수 설정
 
