@@ -93,7 +93,7 @@ int main() {
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
 
-    //initialize_led();
+    initialize_led();
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
