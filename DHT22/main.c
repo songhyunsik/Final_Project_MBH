@@ -2,12 +2,13 @@
 // socket(data): 1sec send data
 // -lwiringPi
 // raspberryPi zero 2w
-
 /*
  *  dht.c:
  *	read temperature and humidity from DHT11 or DHT22 sensor
  *  Based on code found http://www.uugear.com/portfolio/read-dht1122-temperature-humidity-sensor-from-raspberry-pi/
  */
+
+
 
 #include <wiringPi.h>
 #include <stdio.h>
@@ -17,11 +18,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-
 #define MAX_TIMINGS 85
 #define DHT_PIN     0  /* BCM-11 */
-#define SERVER_PORT 8080
-
 
 int data[5] = { 0, 0, 0, 0, 0 };
 
@@ -31,6 +29,11 @@ typedef struct {
 } DHTData;
 
 void read_dht_data(DHTData *dhtData);
+
+#define MAX_TIMINGS 85
+#define DHT_PIN     0  /* BCM-11 */
+#define SERVER_PORT 8080
+
 int connect2Server(const char *server_ip, int server_port);
 
 int main(void)
