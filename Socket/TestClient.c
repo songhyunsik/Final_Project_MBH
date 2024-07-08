@@ -10,7 +10,7 @@
 #define LED_PIN 18
 #define LED_COUNT 100
 #define TARGET_FREQ WS2811_TARGET_FREQ
-#define GPIO_PIN 4
+#define GPIO_PIN 18
 #define DMA 10
 
 ws2811_t ledstring = {
